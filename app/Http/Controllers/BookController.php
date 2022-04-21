@@ -62,7 +62,7 @@ class BookController extends Controller
             $message = 'Book published successfully';
         }
         $book->save();
-        return redirect('edit/' . $book->slug)->withMessage($message);
+        return redirect('/' . $book->slug)->withMessage($message);
     }
 
     public function show($slug)
