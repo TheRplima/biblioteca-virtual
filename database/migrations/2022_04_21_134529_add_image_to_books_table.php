@@ -14,7 +14,7 @@ class AddImageToBooksTable extends Migration
     public function up()
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->string('image');
+            $table->string('image')->default('default.jpg');
         });
     }
 
