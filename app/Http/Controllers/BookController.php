@@ -9,6 +9,8 @@ use App\Models\Book;
 
 use App\Http\Requests\BookFormRequest;
 
+use Illuminate\Support\Facades\File;
+
 class BookController extends Controller
 {
     public function index()
@@ -46,10 +48,13 @@ class BookController extends Controller
         $book->author_id = $request->user()->id;
 
         // Image Upload
-        if ($request->hasFile('image') && $request->file('image')->isValid()){
+        $request->validate([
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $requestImage = $request->image;
             $extension = $requestImage->extension();
-            $imageName = md5($requestImage->getClientOriginalName().strtotime("now")).'.'.$extension;
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . '.' . $extension;
             $requestImage->move(public_path('images/books'), $imageName);
             $book->image = $imageName;
         }
@@ -85,53 +90,68 @@ class BookController extends Controller
 
     public function update(Request $request)
     {
-      //
-      $book_id = $request->input('book_id');
-      $book = Book::find($book_id);
-      if ($book && ($book->author_id == $request->user()->id || $request->user()->is_admin())) {
-        $title = $request->input('title');
-        $slug = Str::slug($title);
-        $duplicate = Book::where('slug', $slug)->first();
-        if ($duplicate) {
-          if ($duplicate->id != $book_id) {
-            return redirect('edit/' . $book->slug)->withErrors('Title already exists.')->withInput();
-          } else {
-            $book->slug = $slug;
-          }
-        }
+        //
+        $book_id = $request->input('book_id');
+        $book = Book::find($book_id);
+        if ($book && ($book->author_id == $request->user()->id || $request->user()->is_admin())) {
+            $title = $request->input('title');
+            $slug = Str::slug($title);
+            $duplicate = Book::where('slug', $slug)->first();
+            if ($duplicate) {
+                if ($duplicate->id != $book_id) {
+                    return redirect('edit/' . $book->slug)->withErrors('Title already exists.')->withInput();
+                } else {
+                    $book->slug = $slug;
+                }
+            }
 
-        $book->title = $title;
-        $book->body = $request->input('body');
+            $book->title = $title;
+            $book->body = $request->input('body');
 
-        if ($request->has('save')) {
-          $book->active = 0;
-          $message = 'Book saved successfully';
-          $landing = 'edit/' . $book->slug;
+            // Image Upload
+            $request->validate([
+                'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+            if ($request->hasFile('image') && $request->file('image')->isValid()) {
+                $requestImage = $request->image;
+                $extension = $requestImage->extension();
+                $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . '.' . $extension;
+                $requestImage->move(public_path('images/books'), $imageName);
+                if (File::exists(public_path('images/books/' . $book->image)) && $book->image != 'deafult.jpg') {
+                    File::delete(public_path('images/books/' . $book->image));
+                }
+                $book->image = $imageName;
+            }
+
+            if ($request->has('save')) {
+                $book->active = 0;
+                $message = 'Book saved successfully';
+                $landing = 'edit/' . $book->slug;
+            } else {
+                $book->active = 1;
+                $message = 'Book updated successfully';
+                $landing = $book->slug;
+            }
+            $book->save();
+            return redirect($landing)->withMessage($message);
         } else {
-          $book->active = 1;
-          $message = 'Book updated successfully';
-          $landing = $book->slug;
+            return redirect('/')->withErrors('you have not sufficient permissions');
         }
-        $book->save();
-        return redirect($landing)->withMessage($message);
-      } else {
-        return redirect('/')->withErrors('you have not sufficient permissions');
-      }
     }
 
     public function destroy(Request $request, $id)
     {
-      //
-      $book = Book::find($id);
-      if($book && ($book->author_id == $request->user()->id || $request->user()->is_admin()))
-      {
-        $book->delete();
-        $data['message'] = 'Book deleted Successfully';
-      }
-      else
-      {
-        $data['errors'] = 'Invalid Operation. You have not sufficient permissions';
-      }
-      return redirect('/')->with($data);
+        //
+        $book = Book::find($id);
+        if ($book && ($book->author_id == $request->user()->id || $request->user()->is_admin())) {
+            if (File::exists(public_path('images/books/' . $book->image)) && $book->image != 'deafult.jpg') {
+                File::delete(public_path('images/books/' . $book->image));
+            }
+            $book->delete();
+            $data['message'] = 'Book deleted Successfully';
+        } else {
+            $data['errors'] = 'Invalid Operation. You have not sufficient permissions';
+        }
+        return redirect('/')->with($data);
     }
 }
