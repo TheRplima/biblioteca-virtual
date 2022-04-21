@@ -30,7 +30,7 @@
             <label for="image" class="form-label">Book cover</label>
             <input type="file" name="image" id="image" value="{{ old('title') }}" class="form-control" />
             @if (!old('image'))
-            <img src="/images/books/{{ $book->image }}" alt="{{ $book->title }}" class="img-thumbnail rounded" style="height:150px;width:auto;" />
+            <img src="/images/books/{{ $book->image }}" alt="{{ $book->title }}" class="img-thumbnail rounded" style="width:150px;" />
             @endif
         </div>
         <div class="form-group mt-2">
