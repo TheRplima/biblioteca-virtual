@@ -49,7 +49,7 @@ class BookController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()){
             $requestImage = $request->image;
             $extension = $requestImage->extension();
-            $imageName = md5($requestImage->getClientOriginalName().strtotime("now")).$extension;
+            $imageName = md5($requestImage->getClientOriginalName().strtotime("now")).'.'.$extension;
             $requestImage->move(public_path('images/books'), $imageName);
             $book->image = $imageName;
         }
