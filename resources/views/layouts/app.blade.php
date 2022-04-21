@@ -86,9 +86,11 @@
                     <div class="card-body">
                         @yield('content')
                     </div>
-                    <div class="card-footer text-muted">
-                        @yield('title-meta')
-                    </div>
+                    @hasSection('title-meta')
+                        <div class="card-footer text-muted">
+                            @yield('title-meta')
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
