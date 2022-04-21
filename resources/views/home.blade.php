@@ -16,7 +16,7 @@
                         @endif
                         <div class="card-body">
                             <h5 class="card-title">
-                                <a href="{{ url('/' . $book->slug) }}">{{ $book->title }}</a>
+                                <a class="subtitle" href="{{ url('/' . $book->slug) }}">{{ $book->title }}</a>
                             </h5>
                             <p class="card-text">
                                 {!! Str::limit($book->body, $limit = 200, $end = '....... <a href=' . url('/' . $book->slug) . '>Read More</a>') !!}

@@ -79,10 +79,10 @@
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif
-        <section class="section" id="home">
+        <section class="section">
             <div class="container">
                 <div class="card">
-                    <h5 class="card-header">@yield('title')</h5>
+                    <h5 class="card-header title">@yield('title')</h5>
                     <div class="card-body">
                         @yield('content')
                     </div>
